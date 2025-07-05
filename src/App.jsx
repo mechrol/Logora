@@ -1,114 +1,34 @@
-import React from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { Toaster } from 'react-hot-toast'
-import { AuthProvider, useAuth } from './contexts/AuthContext'
-import { LanguageProvider } from './contexts/LanguageContext'
-import Layout from './components/Layout'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Profile from './pages/Profile'
-import Communities from './pages/Communities'
-import Projects from './pages/Projects'
+import React, { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Sidebar from './components/Sidebar'
+import Header from './components/Header'
+import Dashboard from './pages/Dashboard'
+import Agents from './pages/Agents'
 import Analytics from './pages/Analytics'
-import Admin from './pages/Admin'
-import LoadingSpinner from './components/LoadingSpinner'
-
-const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth()
-  
-  if (loading) return <LoadingSpinner />
-  if (!user) return <Navigate to="/login" />
-  
-  return children
-}
-
-const AdminRoute = ({ children }) => {
-  const { user, profile, loading } = useAuth()
-  
-  if (loading) return <LoadingSpinner />
-  if (!user) return <Navigate to="/login" />
-  if (profile?.role !== 'admin') return <Navigate to="/" />
-  
-  return children
-}
-
-const PublicRoute = ({ children }) => {
-  const { user, loading } = useAuth()
-  
-  if (loading) return <LoadingSpinner />
-  if (user) return <Navigate to="/" />
-  
-  return children
-}
-
-function AppRoutes() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        } />
-        <Route path="/register" element={
-          <PublicRoute>
-            <Register />
-          </PublicRoute>
-        } />
-        <Route path="/" element={
-          <ProtectedRoute>
-            <Layout>
-              <Home />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <Layout>
-              <Profile />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/communities" element={
-          <ProtectedRoute>
-            <Layout>
-              <Communities />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/projects" element={
-          <ProtectedRoute>
-            <Layout>
-              <Projects />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/analytics" element={
-          <ProtectedRoute>
-            <Layout>
-              <Analytics />
-            </Layout>
-          </ProtectedRoute>
-        } />
-        <Route path="/admin" element={
-          <AdminRoute>
-            <Admin />
-          </AdminRoute>
-        } />
-      </Routes>
-    </Router>
-  )
-}
+import Settings from './pages/Settings'
 
 function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <AppRoutes />
-        <Toaster position="top-right" />
-      </AuthProvider>
-    </LanguageProvider>
+    <Router>
+      <div className="flex h-screen bg-gray-900">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header onMenuClick={() => setSidebarOpen(true)} />
+          
+          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-900">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/agents" element={<Agents />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/settings" element={<Settings />} />
+            </Routes>
+          </main>
+        </div>
+      </div>
+    </Router>
   )
 }
 
